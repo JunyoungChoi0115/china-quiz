@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>중국문화 상식 퀴즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --paper: #E4DCC8;
+    --paper-dark: #D6CBAE;
+    --paper-line: #C7B999;
+    --ink: #221E19;
+    --ink-soft: #5B554C;
+    --seal: #A6342A;
+    --seal-soft: #C96559;
+    --jade: #4B6B57;
+    --jade-soft: #E4EEE8;
+    --seal-bg: #F3DEDA;
+    --gold: #A9824C;
+    --radius: 4px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 16px;
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(0,0,0,0.02), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(0,0,0,0.03), transparent 45%);
+  }
+
+  /* 화면 최상단 고정 진행 막대 */
+  .top-progress{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--paper-dark);
+    z-index: 100;
+    display: none;
+  }
+
+  .top-progress-fill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--seal-soft));
+    transition: width 0.45s cubic-bezier(.4,0,.2,1);
+  }
+
+  .stage{
+    width: 100%;
+    max-width: 480px;
+  }
+
+  header.top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin-bottom: 20px;
+    padding: 0 4px;
+  }
+
+  header.top .title-block h1{
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: clamp(22px, 5vw, 28px);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+
+  header.top .title-block p{
+    margin:0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .hanzi-mark{
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    color: var(--ink-soft);
+    writing-mode: vertical-rl;
+    letter-spacing: 3px;
+    opacity: 0.55;
+    line-height: 1;
+    padding-bottom: 2px;
+  }
+
+  .card{
+    background: var(--paper);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--radius);
+    padding: 28px 24px 24px;
+    position: relative;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    overflow: hidden;
+  }
+
+  /* 화면 전환용 공통 트랜지션 */
+  .panel{
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  .panel.fade-out{
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  /* ── 시작 화면 ── */
+  #start-panel{
+    text-align: center;
+    padding: 12px 0 4px;
+  }
+
+  .start-mark{
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 22px;
+    background: var(--seal);
+    color: #fff;
+    border-radius: 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: 46px;
+    box-shadow: inset 0 0 0 2.5px rgba(255,255,255,0.35);
+  }
+
+  .start-tagline{
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+  }
+
+  .btn-large{
+    padding: 14px 38px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* ── 문제 화면 ── */
+  .q-meta{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .seal-count{
+    width: 30px;
+    height: 30px;
+    flex-shrink:0;
+    background: var(--seal);
+    color: #fff;
+    border-radius: 3px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.35);
+  }
+
+  .progress-num{
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .question-text{
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 600;
+    font-size: clamp(17px, 4.4vw, 20px);
+    line-height: 1.5;
+    margin: 0 0 22px;
+  }
+
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .option{
+    text-align:left;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--radius);
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor:pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .option:hover:not(:disabled){
+    border-color: var(--gold);
+    background: #FBF8F1;
+  }
+
+  .option:disabled{
+    cursor: default;
+  }
+
+  .opt-label{
+    display:block;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .opt-meaning{
+    display:block;
+    margin-top: 3px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+
+  .option.correct{
+    background: var(--jade-soft);
+    border-color: var(--jade);
+    transform: scale(1.015);
+  }
+
+  .option.correct .opt-label{ color: var(--jade); }
+
+  .option.incorrect{
+    background: var(--seal-bg);
+    border-color: var(--seal);
+  }
+
+  .option.incorrect .opt-label{ color: var(--seal); }
+
+  .feedback{
+    margin-top: 16px;
+    min-height: 22px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .feedback.show{ opacity: 1; }
+  .feedback.ok{ color: var(--jade); }
+  .feedback.no{ color: var(--seal); }
+
+  .feedback .explain{
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* ── 결과 화면 ── */
+  .score-summary{
+    text-align:center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed var(--paper-line);
+  }
+
+  #result-panel h2{
+    font-family: 'Noto Serif KR', serif;
+    font-size: 19px;
+    margin: 0 0 18px;
+    text-align:center;
+  }
+
+  .score-badge{
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 16px;
+    background: var(--seal);
+    color: #fff;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: 30px;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35);
+  }
+
+  .score-badge span{
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 2px;
+  }
+
+  .score-count{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
+
+  .score-count strong{
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .score-msg{
+    font-family: 'Noto Serif KR', serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .wrong-heading{
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+
+  .all-correct{
+    text-align:center;
+    font-size: 15px;
+    color: var(--jade);
+    font-weight: 500;
+    margin: 4px 0 4px;
+  }
+
+  .wrong-list{
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .wrong-item{
+    background:#fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .wrong-item .wq{
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 10px;
+  }
+
+  .wrong-compare{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tag{
+    display:inline-block;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+
+  .tag.mine{ background: var(--seal-bg); color: var(--seal); }
+  .tag.correct{ background: var(--jade-soft); color: var(--jade); }
+
+  .explain-line{
+    margin:0;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .result-actions{
+    display:flex;
+    flex-wrap: wrap;
+    justify-content:center;
+    gap: 10px;
+  }
+
+  .btn{
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor:pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .btn-primary{ background: var(--ink); color: var(--paper); }
+  .btn-primary:hover{ background: #3a352c; }
+
+  .btn-accent{ background: var(--seal); color: #fff; }
+  .btn-accent:hover{ background: #8f2c23; }
+
+  .btn-outline{ background: transparent; color: var(--ink); border-color: var(--paper-line); }
+  .btn-outline:hover{ border-color: var(--gold); background: #fff; }
+
+  footer.note{
+    text-align:center;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+
+  .credit{
+    text-align:center;
+    margin: 6px 0 0;
+    font-size: 11px;
+    color: var(--ink-soft);
+    opacity: 0.55;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-progress" id="top-progress"><div class="top-progress-fill" id="top-progress-fill"></div></div>
+
+<div class="stage">
+
+  <header class="top">
+    <div class="title-block">
+      <h1>중국문화 상식 퀴즈</h1>
+      <p class="tagline" id="tagline">중국 문화, 얼마나 알고 계신가요?</p>
+      <p class="stats" id="stats" style="display:none;">총 <span id="total-count-label">0</span>문제 · 남은 <span id="remaining-label">0</span>문제</p>
+    </div>
+    <div class="hanzi-mark">中國文化</div>
+  </header>
+
+  <div class="card">
+
+    <div id="start-panel" class="panel">
+      <div class="start-mark">問</div>
+      <p class="start-tagline">춘절과 중추절, 차 문화와 한자,<br>지역 요리까지 10가지 질문으로 알아봐요</p>
+      <button class="btn btn-accent btn-large" id="start-btn">퀴즈 시작</button>
+    </div>
+
+    <div id="question-panel" class="panel" style="display:none;">
+      <div class="q-meta">
+        <div class="seal-count" id="seal-count">1</div>
+        <div class="progress-num" id="progress-num">1 / 10</div>
+      </div>
+
+      <p class="question-text" id="question-text"></p>
+
+      <div class="options" id="options"></div>
+
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div id="result-panel" class="panel" style="display:none;">
+      <h2>퀴즈 완료!</h2>
+
+      <div class="score-summary">
+        <div class="score-badge" id="score-badge">0<span>점</span></div>
+        <p class="score-count" id="score-count"></p>
+        <p class="score-msg" id="score-msg"></p>
+      </div>
+
+      <div id="wrong-section"></div>
+
+      <div class="result-actions no-capture">
+        <button class="btn btn-accent" id="retry-wrong-btn">틀린 문제만 다시 풀기</button>
+        <button class="btn btn-primary" id="retry-all-btn">전체 다시 풀기</button>
+        <button class="btn btn-outline" id="save-image-btn">이미지로 저장</button>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="note no-capture" id="footer-hint" style="display:none;">보기를 누르면 바로 정답 여부를 알려줘요</footer>
+  <p class="credit">제작: 최준영</p>
+</div>
+
+<script>
+  // ────────────────────────────────────────────────
+  // 문제 데이터
+  // 아래 형식에 맞춰 문제를 추가/수정하세요 (몇 개를 넣든 자동으로 반영됩니다)
+  // {
+  //   q: "질문 내용",
+  //   options: [
+  //     { label: "한국어 독음(漢字)", meaning: "한 줄 뜻풀이" },
+  //     ...4개
+  //   ],
+  //   answer: 정답의 인덱스 (0부터 시작),
+  //   explain: "정답의 근거 한 줄"
+  // }
+  // ────────────────────────────────────────────────
+  const sourceQuestions = [
+    {
+      q: "중국에서 춘절 전날 밤, 온 가족이 모여 저녁을 먹는 날을 가리키는 말은?",
+      options: [
+        { label: "제석(除夕)", meaning: "설 전날 밤, 온 가족이 모여 녠예판을 먹는 날" },
+        { label: "원소절(元宵節)", meaning: "정월대보름, 탕위안을 먹는 명절" },
+        { label: "청명절(淸明節)", meaning: "성묘하며 조상을 기리는 명절" },
+        { label: "소한(小寒)", meaning: "24절기 중 하나로 가장 추운 시기" }
+      ],
+      answer: 0,
+      explain: "除夕은 음력 마지막 날 밤을 뜻하며, 이날 가족이 모여 녠예판(年夜飯)을 먹는 풍습이 있다."
+    },
+    {
+      q: "춘절에 세뱃돈이나 덕담을 담아 건네는 붉은 봉투를 무엇이라 부르는가?",
+      options: [
+        { label: "홍바오(紅包)", meaning: "붉은색 세뱃돈·축의금 봉투" },
+        { label: "청첩장(請帖)", meaning: "결혼식 등에 초대하는 편지" },
+        { label: "부적(符籍)", meaning: "액운을 막기 위해 붙이는 종이" },
+        { label: "대련(對聯)", meaning: "문 앞에 붙이는 대구 글귀" }
+      ],
+      answer: 0,
+      explain: "붉은색은 액운을 막고 복을 부른다고 여겨져, 세뱃돈은 반드시 홍바오에 넣어 전달한다."
+    },
+    {
+      q: "중추절에 보름달을 보며 가족이 나눠 먹는 대표 음식은?",
+      options: [
+        { label: "월병(月餅)", meaning: "보름달 모양의 중추절 대표 과자" },
+        { label: "종자(粽子)", meaning: "찹쌀을 댓잎에 싼 단오절 음식" },
+        { label: "탕위안(湯圓)", meaning: "찹쌀 경단을 넣은 원소절 음식" },
+        { label: "라바죽(臘八粥)", meaning: "음력 12월 8일에 먹는 잡곡죽" }
+      ],
+      answer: 0,
+      explain: "둥근 보름달 모양의 월병은 가족의 화목과 재회를 상징해 중추절에 나눠 먹는다."
+    },
+    {
+      q: "중추절 유래 전설 중, 불로장생약을 먹고 달로 날아갔다는 여인의 이름은?",
+      options: [
+        { label: "항아(嫦娥)", meaning: "불사약을 먹고 달로 올라간 여신" },
+        { label: "서왕모(西王母)", meaning: "불사약을 지녔다는 도교의 여신" },
+        { label: "맹강녀(孟姜女)", meaning: "만리장성 설화 속 슬픈 여인" },
+        { label: "직녀(織女)", meaning: "견우와 만나는 칠석 설화 속 여인" }
+      ],
+      answer: 0,
+      explain: "'항아분월(嫦娥奔月)' 설화는 항아가 불사약을 먹고 달로 올라가 살게 되었다는 이야기다."
+    },
+    {
+      q: "발효 정도에 따른 중국 6대 다류(茶類) 분류에 속하지 않는 것은?",
+      options: [
+        { label: "녹차(綠茶)", meaning: "발효하지 않은 중국 대표 차" },
+        { label: "흑차(黑茶)", meaning: "미생물로 후발효시킨 차, 보이차가 대표적" },
+        { label: "커피차(咖啡茶)", meaning: "실제로는 존재하지 않는 분류" },
+        { label: "백차(白茶)", meaning: "최소한으로 가공한 순한 맛의 차" }
+      ],
+      answer: 2,
+      explain: "중국 6대 다류는 녹차·백차·황차·청차·홍차·흑차로 나뉘며, 커피차라는 분류는 존재하지 않는다."
+    },
+    {
+      q: "작은 찻잔과 다구로 정성을 들여 차를 우리는 방식으로, 광둥성 차오저우·산터우 지역에서 발달한 다도는?",
+      options: [
+        { label: "공부차(工夫茶)", meaning: "작은 잔으로 정성껏 우리는 다도" },
+        { label: "대용차(代用茶)", meaning: "찻잎이 아닌 재료로 만든 차" },
+        { label: "말차도(抹茶道)", meaning: "가루차를 격불하는 일본식 다도" },
+        { label: "다선일미(茶禪一味)", meaning: "차와 선이 하나라는 불교 사상" }
+      ],
+      answer: 0,
+      explain: "공부차는 '공부(정성)'를 들여 차를 우리는 중국 전통 다도로, 차오저우 지역이 대표적이다."
+    },
+    {
+      q: "한자가 만들어지는 원리를 여섯 가지로 분류한 것을 무엇이라 하는가?",
+      options: [
+        { label: "육서(六書)", meaning: "한자 형성 원리 6가지 분류" },
+        { label: "사성(四聲)", meaning: "중국어 성조 네 가지" },
+        { label: "오행(五行)", meaning: "목화토금수 다섯 원소 사상" },
+        { label: "팔괘(八卦)", meaning: "주역에서 자연 현상을 나타내는 여덟 괘" }
+      ],
+      answer: 0,
+      explain: "육서는 상형·지사·회의·형성·전주·가차로, 한자 형성 원리를 여섯 가지로 나눈 것이다."
+    },
+    {
+      q: "현재 중국 본토(중화인민공화국)에서 공식적으로 사용하는 한자 서체는?",
+      options: [
+        { label: "간체자(簡體字)", meaning: "획수를 줄인 중국 표준 한자" },
+        { label: "번체자(繁體字)", meaning: "옛 형태를 유지한 전통 한자" },
+        { label: "갑골문(甲骨文)", meaning: "거북 등딱지에 새긴 가장 오래된 한자" },
+        { label: "초서(草書)", meaning: "흘려 쓴 서예 서체" }
+      ],
+      answer: 0,
+      explain: "중국은 1950년대 문맹률을 낮추기 위해 획수를 줄인 간체자를 표준 문자로 채택했다."
+    },
+    {
+      q: "마파두부로 대표되며, 맵고 얼얼한 '마라(麻辣)' 맛이 특징인 중국 요리는?",
+      options: [
+        { label: "사천요리(川菜)", meaning: "화자오와 고추를 쓰는 매운 요리" },
+        { label: "광둥요리(粤菜)", meaning: "재료 본연의 맛을 살린 담백한 요리" },
+        { label: "산둥요리(魯菜)", meaning: "짜고 신선한 맛의 화북 지역 요리" },
+        { label: "저장요리(浙菜)", meaning: "담백하고 산뜻한 강남 지역 요리" }
+      ],
+      answer: 0,
+      explain: "사천요리는 화자오(花椒)와 고추를 많이 써서 맵고 혀가 얼얼한 마라 맛을 대표적인 특징으로 한다."
+    },
+    {
+      q: "딤섬(點心) 문화와 재료 본연의 맛을 살린 담백한 조리법으로 유명한 중국 요리는?",
+      options: [
+        { label: "광둥요리(粤菜)", meaning: "딤섬 문화의 발상지, 담백한 조리법" },
+        { label: "후난요리(湘菜)", meaning: "매콤하고 신 맛이 강한 요리" },
+        { label: "안후이요리(徽菜)", meaning: "산나물과 약재를 활용한 요리" },
+        { label: "푸젠요리(閩菜)", meaning: "해산물 육수를 활용한 담백한 요리" }
+      ],
+      answer: 0,
+      explain: "광둥요리는 재료 본연의 신선한 맛을 살리는 담백한 조리법이 특징이며, 딤섬 문화의 발상지로 유명하다."
+    }
+  ];
+
+  const startPanel = document.getElementById('start-panel');
+  const questionPanel = document.getElementById('question-panel');
+  const resultPanel = document.getElementById('result-panel');
+  const startBtn = document.getElementById('start-btn');
+  const tagline = document.getElementById('tagline');
+  const statsLine = document.getElementById('stats');
+  const footerHint = document.getElementById('footer-hint');
+  const topProgress = document.getElementById('top-progress');
+  const topProgressFill = document.getElementById('top-progress-fill');
+
+  const questionText = document.getElementById('question-text');
+  const optionsWrap = document.getElementById('options');
+  const feedback = document.getElementById('feedback');
+  const sealCount = document.getElementById('seal-count');
+  const progressNum = document.getElementById('progress-num');
+  const totalLabel = document.getElementById('total-count-label');
+  const remainingLabel = document.getElementById('remaining-label');
+  const scoreBadge = document.getElementById('score-badge');
+  const scoreCount = document.getElementById('score-count');
+  const scoreMsg = document.getElementById('score-msg');
+  const wrongSection = document.getElementById('wrong-section');
+  const retryWrongBtn = document.getElementById('retry-wrong-btn');
+  const retryAllBtn = document.getElementById('retry-all-btn');
+  const saveImageBtn = document.getElementById('save-image-btn');
+
+  let sessionQuestions = [];
+  let TOTAL = 0;
+  let current = 0;
+  let score = 0;
+  let sessionResults = [];
+  const ADVANCE_DELAY = 2200;
+  const FADE_DELAY = 220;
+
+  function shuffle(list){
+    const arr = list.slice();
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // 화면(패널)을 부드럽게 전환
+  function fadeSwap(hideEl, showEl, midCallback){
+    hideEl.classList.add('fade-out');
+    setTimeout(() => {
+      hideEl.style.display = 'none';
+      hideEl.classList.remove('fade-out');
+      if(midCallback) midCallback();
+      showEl.style.display = 'block';
+      showEl.classList.add('fade-out');
+      void showEl.offsetWidth;
+      showEl.classList.remove('fade-out');
+    }, FADE_DELAY);
+  }
+
+  // 같은 패널 안에서 문제만 부드럽게 교체
+  function fadeQuestion(callback){
+    questionPanel.classList.add('fade-out');
+    setTimeout(() => {
+      callback();
+      void questionPanel.offsetWidth;
+      questionPanel.classList.remove('fade-out');
+    }, FADE_DELAY);
+  }
+
+  function startSession(list){
+    tagline.style.display = 'none';
+    statsLine.style.display = 'block';
+    footerHint.style.display = 'block';
+    topProgress.style.display = 'block';
+
+    sessionQuestions = shuffle(list);
+    TOTAL = sessionQuestions.length;
+    current = 0;
+    score = 0;
+    sessionResults = [];
+
+    totalLabel.textContent = TOTAL;
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    const item = sessionQuestions[current];
+
+    sealCount.textContent = current + 1;
+    progressNum.textContent = `${current + 1} / ${TOTAL}`;
+    remainingLabel.textContent = TOTAL - current;
+    topProgressFill.style.width = `${(current / TOTAL) * 100}%`;
+
+    questionText.textContent = item.q;
+    optionsWrap.innerHTML = '';
+    feedback.className = 'feedback';
+    feedback.innerHTML = '';
+
+    item.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.type = 'button';
+      btn.innerHTML = `<span class="opt-label">${opt.label}</span><span class="opt-meaning">${opt.meaning}</span>`;
+      btn.addEventListener('click', () => selectOption(idx));
+      optionsWrap.appendChild(btn);
+    });
+  }
+
+  function selectOption(idx){
+    const item = sessionQuestions[current];
+    const buttons = optionsWrap.querySelectorAll('.option');
+
+    buttons.forEach(b => b.disabled = true);
+
+    const isCorrect = idx === item.answer;
+    const myLabel = item.options[idx].label;
+    const correctLabel = item.options[item.answer].label;
+
+    if(isCorrect){
+      buttons[idx].classList.add('correct');
+      score++;
+      feedback.innerHTML = `<div>정답입니다!</div><div class="explain">${item.explain}</div>`;
+      feedback.classList.add('show', 'ok');
+    } else {
+      buttons[idx].classList.add('incorrect');
+      buttons[item.answer].classList.add('correct');
+      feedback.innerHTML = `<div>아쉽네요! 정답은 '${correctLabel}' 입니다.</div><div class="explain">${item.explain}</div>`;
+      feedback.classList.add('show', 'no');
+    }
+
+    sessionResults.push({
+      original: item,
+      q: item.q,
+      myAnswer: myLabel,
+      correctAnswer: correctLabel,
+      isCorrect,
+      explain: item.explain
+    });
+
+    setTimeout(() => {
+      current++;
+      if(current < TOTAL){
+        fadeQuestion(renderQuestion);
+      } else {
+        fadeSwap(questionPanel, resultPanel, showResult);
+      }
+    }, ADVANCE_DELAY);
+  }
+
+  function showResult(){
+    footerHint.style.display = 'none';
+    topProgressFill.style.width = '100%';
+
+    const percent = Math.round((score / TOTAL) * 100);
+    scoreBadge.innerHTML = `${percent}<span>점</span>`;
+    scoreCount.innerHTML = `${TOTAL}문제 중 <strong>${score}개</strong> 정답`;
+
+    const ratio = score / TOTAL;
+    let msg;
+    if(ratio === 1) msg = '완벽해요, 중국통이시네요!';
+    else if(ratio >= 0.7) msg = '제법 잘 아시는군요!';
+    else if(ratio >= 0.4) msg = '조금 더 알아가 볼까요?';
+    else msg = '다음엔 더 잘할 수 있을 거예요.';
+    scoreMsg.textContent = msg;
+
+    const wrongList = sessionResults.filter(r => !r.isCorrect);
+
+    if(wrongList.length === 0){
+      wrongSection.innerHTML = `<p class="all-correct">모두 맞혔어요!</p>`;
+      retryWrongBtn.style.display = 'none';
+    } else {
+      retryWrongBtn.style.display = 'inline-block';
+      retryWrongBtn.textContent = `틀린 문제만 다시 풀기 (${wrongList.length})`;
+
+      const itemsHtml = wrongList.map((r, i) => `
+        <div class="wrong-item">
+          <p class="wq">${i + 1}. ${r.q}</p>
+          <div class="wrong-compare">
+            <span class="tag mine">내 답 · ${r.myAnswer}</span>
+            <span class="tag correct">정답 · ${r.correctAnswer}</span>
+          </div>
+          <p class="explain-line">${r.explain}</p>
+        </div>
+      `).join('');
+
+      wrongSection.innerHTML = `<h3 class="wrong-heading">틀린 문제 (${wrongList.length})</h3><div class="wrong-list">${itemsHtml}</div>`;
+    }
+  }
+
+  async function saveAsImage(){
+    if(typeof html2canvas === 'undefined'){
+      alert('이미지 저장 기능을 불러오지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해주세요.');
+      return;
+    }
+    const target = document.querySelector('.stage');
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+    const canvas = await html2canvas(target, {
+      backgroundColor: bg,
+      scale: 2,
+      ignoreElements: (el) => el.classList.contains('no-capture')
+    });
+    const link = document.createElement('a');
+    link.download = '중국문화_퀴즈_결과.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  startBtn.addEventListener('click', () => {
+    fadeSwap(startPanel, questionPanel, () => startSession(sourceQuestions));
+  });
+
+  retryAllBtn.addEventListener('click', () => {
+    fadeSwap(resultPanel, questionPanel, () => startSession(sourceQuestions));
+  });
+
+  retryWrongBtn.addEventListener('click', () => {
+    const wrongOriginals = sessionResults.filter(r => !r.isCorrect).map(r => r.original);
+    fadeSwap(resultPanel, questionPanel, () => startSession(wrongOriginals));
+  });
+
+  saveImageBtn.addEventListener('click', saveAsImage);
+</script>
+
+</body>
+</html>
