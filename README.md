@@ -122,3 +122,5 @@
 
 **정답:** ① 광둥요리(粤菜)
 **근거:** 광둥요리는 재료 본연의 신선한 맛을 살리는 담백한 조리법이 특징이며, 딤섬 문화의 발상지로 유명하다.
+
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-live-brightgreen)](https://junyoungchoi0115.github.io/china-quiz/)
